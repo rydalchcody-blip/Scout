@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scout — Find a Gift</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #0F1B2D; color: #F8F9FA; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+    .logo { font-size: 16px; font-weight: 700; color: #2563EB; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 40px; }
+    .quiz-card { background: #F8F9FA; border-radius: 24px; padding: 36px 32px; width: 100%; max-width: 560px; color: #0F1B2D; }
+    .progress { display: flex; gap: 6px; margin-bottom: 28px; }
+    .progress-dot { height: 4px; flex: 1; border-radius: 2px; background: #e2e8f0; transition: background 0.3s; }
+    .progress-dot.active { background: #2563EB; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .step-label { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .step h2 { font-size: 24px; font-weight: 700; color: #0F1B2D; margin-bottom: 20px; line-height: 1.2; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .chip { padding: 9px 18px; border-radius: 24px; border: 1.5px solid #e2e8f0; font-size: 14px; font-weight: 500; color: #0F1B2D; background: #fff; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .chip:hover { border-color: #2563EB; color: #2563EB; }
+    .chip.selected { background: #2563EB; border-color: #2563EB; color: #fff; }
+    .btn-row { display: flex; gap: 10px; align-items: center; }
+    .back-btn { background: none; border: 1.5px solid #e2e8f0; color: #64748b; font-size: 14px; font-weight: 500; padding: 11px 18px; border-radius: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .next-btn { flex: 1; background: #2563EB; color: #fff; font-size: 15px; font-weight: 600; padding: 13px; border-radius: 12px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .next-btn:hover { opacity: 0.9; }
+    .next-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="logo">Scout</div>
+  <div class="quiz-card">
+    <div class="progress">
+      <div class="progress-dot active" id="dot1"></div>
+      <div class="progress-dot" id="dot2"></div>
+      <div class="progress-dot" id="dot3"></div>
+    </div>
+
+    <!-- Step 1: Who -->
+    <div class="step active" id="step1">
+      <div class="step-label">Step 1 of 3</div>
+      <h2>Who are you shopping for?</h2>
+      <div class="chips">
+        <div class="chip" onclick="select(this,'who')">Mom</div>
+        <div class="chip" onclick="select(this,'who')">Dad</div>
+        <div class="chip" onclick="select(this,'who')">Partner</div>
+        <div class="chip" onclick="select(this,'who')">Sibling</div>
+        <div class="chip" onclick="select(this,'who')">Best Friend</div>
+        <div class="chip" onclick="select(this,'who')">Coworker</div>
+        <div class="chip" onclick="select(this,'who')">Grandma</div>
+        <div class="chip" onclick="select(this,'who')">Grandpa</div>
+        <div class="chip" onclick="select(this,'who')">Teacher</div>
+        <div class="chip" onclick="select(this,'who')">Kid</div>
+        <div class="chip" onclick="select(this,'who')">Teen</div>
+      </div>
+      <div class="btn-row">
+        <button class="next-btn" id="next1" onclick="goTo(2)" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Occasion -->
+    <div class="step" id="step2">
+      <div class="step-label">Step 2 of 3</div>
+      <h2>What's the occasion?</h2>
+      <div class="chips" id="occasion-chips">
+        <div class="chip" onclick="select(this,'occasion')">Christmas</div>
+        <div class="chip" onclick="select(this,'occasion')">Birthday</div>
+        <div class="chip" onclick="select(this,'occasion')">Anniversary</div>
+        <div class="chip" onclick="select(this,'occasion')">Graduation</div>
+        <div class="chip" onclick="select(this,'occasion')">Easter</div>
+        <div class="chip" onclick="select(this,'occasion')">Valentine's Day</div>
+        <div class="chip" onclick="select(this,'occasion')">Mother's Day</div>
+        <div class="chip" onclick="select(this,'occasion')">Father's Day</div>
+        <div class="chip" onclick="select(this,'occasion')">New Baby</div>
+        <div class="chip" onclick="select(this,'occasion')">Housewarming</div>
+        <div class="chip" onclick="select(this,'occasion')">Just Because</div>
+      </div>
+      <div class="btn-row">
+        <button class="back-btn" onclick="goTo(1)">← Back</button>
+        <button class="next-btn" id="next2" onclick="goTo(3)" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Budget -->
+    <div class="step" id="step3">
+      <div class="step-label">Step 3 of 3</div>
+      <h2>What's your budget?</h2>
+      <div class="chips">
+        <div class="chip" onclick="select(this,'budget')">Under $25</div>
+        <div class="chip" onclick="select(this,'budget')">$25–$75</div>
+        <div class="chip" onclick="select(this,'budget')">$75–$125</div>
+        <div class="chip" onclick="select(this,'budget')">$125+</div>
+      </div>
+      <div class="btn-row">
+        <button class="back-btn" onclick="goTo(2)">← Back</button>
+        <button class="next-btn" id="next3" onclick="showResults()" disabled>Find gifts →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const answers = { who: '', occasion: '', budget: '' };
+
+    function select(el, group) {
+      el.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      answers[group] = el.textContent;
+      const nextMap = { who: 'next1', occasion: 'next2', budget: 'next3' };
+      document.getElementById(nextMap[group]).disabled = false;
+    }
+
+    function goTo(step) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+      document.querySelectorAll('.progress-dot').forEach((d, i) => {
+        d.classList.toggle('active', i < step);
+      });
+    }
+
+    function showResults() {
+      const params = new URLSearchParams({ who: answers.who, occasion: answers.occasion, budget: answers.budget });
+      window.location.href = '/results?' + params.toString();
+    }
+  </script>
+</body>
+</html>

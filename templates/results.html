@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scout — Gift Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #0F1B2D; color: #F8F9FA; min-height: 100vh; padding-bottom: 100px; }
+
+    /* LOADING */
+    #loading-overlay {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #0F1B2D;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.4s ease;
+    }
+    #loading-overlay.fade-out { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 4px solid #1e3a5f;
+      border-top-color: #2563EB;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-title { font-size: 20px; font-weight: 600; color: #F8F9FA; margin-bottom: 8px; text-align: center; padding: 0 24px; }
+    .loading-sub { font-size: 14px; color: #94a3b8; text-align: center; }
+
+    /* SEASONAL BANNER */
+    .season-banner {
+      display: none;
+      padding: 14px 24px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .season-banner span { font-size: 18px; margin-right: 8px; }
+    .season-banner .days { font-weight: 700; }
+
+    /* HEADER */
+    .header { background: #0F1B2D; padding: 24px 24px 20px; border-bottom: 1px solid #1e3a5f; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 16px; font-weight: 700; color: #2563EB; letter-spacing: 0.1em; text-transform: uppercase; }
+    .header-right { font-size: 13px; color: #64748b; }
+
+    .results-hero { padding: 28px 24px 20px; max-width: 680px; margin: 0 auto; }
+    .results-hero h1 { font-size: 26px; font-weight: 700; color: #F8F9FA; margin-bottom: 6px; }
+    .results-hero p { font-size: 15px; color: #94a3b8; }
+
+    .filter-chips { display: flex; gap: 8px; padding: 0 24px 20px; max-width: 680px; margin: 0 auto; flex-wrap: wrap; }
+    .filter-chip { background: #1e3a5f; color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-size: 13px; }
+
+    .cards { padding: 0 24px; max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+    .card { background: #fff; border-radius: 16px; padding: 16px; display: flex; gap: 16px; align-items: center; box-shadow: 0 8px 32px rgba(0,0,0,0.25); animation: fadeIn 0.3s ease forwards; opacity: 0; }
+    @keyframes fadeIn { to { opacity: 1; } }
+    .card-img { width: 90px; height: 90px; border-radius: 12px; background: #EFF6FF; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .card-body { flex: 1; min-width: 0; }
+    .card-name { font-size: 14px; font-weight: 600; color: #0F1B2D; margin-bottom: 4px; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .rating { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+    .badge { display: inline-block; background: #2563EB; color: #fff; font-size: 10px; font-weight: 600; border-radius: 20px; padding: 3px 10px; margin-bottom: 8px; }
+    .card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .card-price { font-size: 17px; font-weight: 700; color: #0F1B2D; flex-shrink: 0; }
+    .amazon-btn { background: #2563EB; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .amazon-btn:hover { opacity: 0.85; }
+
+    .no-results { text-align: center; padding: 64px 24px; color: #94a3b8; }
+    .no-results h2 { font-size: 22px; margin-bottom: 8px; color: #F8F9FA; }
+    .no-results a { display: inline-block; margin-top: 16px; background: #2563EB; color: #fff; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; }
+
+    .start-over { position: fixed; bottom: 24px; right: 24px; background: #0F1B2D; border: 1.5px solid #2563EB; color: #2563EB; border-radius: 24px; padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 24px rgba(0,0,0,0.4); text-decoration: none; font-family: 'DM Sans', sans-serif; }
+    .start-over:hover { background: #1e3a5f; }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-title" id="loading-msg">Scouting the best gifts...</div>
+    <div class="loading-sub">Searching thousands of products for you</div>
+  </div>
+
+  <!-- SEASONAL BANNER -->
+  <div class="season-banner" id="season-banner"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">Scout</div>
+    <div class="header-right">Powered by Amazon</div>
+  </div>
+
+  <div class="results-hero">
+    <h1>Trending gifts for {{ who }}</h1>
+    <p>What people are actually buying this {{ occasion }}</p>
+  </div>
+
+  <div class="filter-chips">
+    <div class="filter-chip">👤 {{ who }}</div>
+    <div class="filter-chip">🎁 {{ occasion }}</div>
+    <div class="filter-chip">💰 {{ budget }}</div>
+  </div>
+
+  <div class="cards" id="cards-container">
+    <!-- Products injected by JS -->
+  </div>
+
+  <a href="/quiz" class="start-over">↺ Start Over</a>
+
+  <script>
+    // ── LOADING MESSAGES ──
+    const messages = [
+      "Scouting the best gifts...",
+      "Checking what's trending...",
+      "Finding top picks for you...",
+      "Almost there...",
+    ];
+    let msgIndex = 0;
+    const msgEl = document.getElementById("loading-msg");
+    const msgInterval = setInterval(() => {
+      msgIndex = (msgIndex + 1) % messages.length;
+      msgEl.textContent = messages[msgIndex];
+    }, 1500);
+
+    // ── SEASONAL COUNTDOWN ──
+    const seasons = [
+      { name: "Mother's Day",   emoji: "💐", color: "#BE185D", bg: "#FDF2F8", date: (y) => new Date(y, 4, getDayOfWeek(y, 4, 0, 2)) },
+      { name: "Father's Day",   emoji: "👔", color: "#1D4ED8", bg: "#EFF6FF", date: (y) => new Date(y, 5, getDayOfWeek(y, 5, 0, 3)) },
+      { name: "Halloween",      emoji: "🎃", color: "#C2410C", bg: "#FFF7ED", date: (y) => new Date(y, 9, 31) },
+      { name: "Christmas",      emoji: "🎄", color: "#15803D", bg: "#F0FDF4", date: (y) => new Date(y, 11, 25) },
+      { name: "Valentine's Day",emoji: "❤️",  color: "#BE123C", bg: "#FFF1F2", date: (y) => new Date(y, 1, 14) },
+      { name: "Easter",         emoji: "🐣", color: "#7C3AED", bg: "#F5F3FF", date: (y) => getEaster(y) },
+    ];
+
+    function getDayOfWeek(year, month, dow, nth) {
+      // nth occurrence of dow in month
+      let d = new Date(year, month, 1);
+      let count = 0;
+      while (d.getMonth() === month) {
+        if (d.getDay() === dow) { count++; if (count === nth) return d.getDate(); }
+        d.setDate(d.getDate() + 1);
+      }
+      return 1;
+    }
+
+    function getEaster(year) {
+      const a = year % 19, b = Math.floor(year/100), c = year % 100;
+      const d = Math.floor(b/4), e = b % 4, f = Math.floor((b+8)/25);
+      const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15) % 30;
+      const i = Math.floor(c/4), k = c % 4;
+      const l = (32+2*e+2*i-h-k) % 7;
+      const m = Math.floor((a+11*h+22*l)/451);
+      const month = Math.floor((h+l-7*m+114)/31) - 1;
+      const day = ((h+l-7*m+114) % 31) + 1;
+      return new Date(year, month, day);
+    }
+
+    function showSeasonBanner() {
+      const now = new Date();
+      const year = now.getFullYear();
+      let closest = null;
+      let minDays = 999;
+
+      for (const s of seasons) {
+        let date = s.date(year);
+        if (date < now) date = s.date(year + 1);
+        const days = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+        if (days < minDays && days <= 60) {
+          minDays = days;
+          closest = { ...s, days, date };
+        }
+      }
+
+      if (closest) {
+        const banner = document.getElementById("season-banner");
+        banner.style.display = "block";
+        banner.style.background = closest.bg;
+        banner.style.color = closest.color;
+        banner.style.borderBottom = `1px solid ${closest.color}30`;
+        const label = closest.days === 0 ? "Today!" : closest.days === 1 ? "Tomorrow!" : `${closest.days} days away`;
+        banner.innerHTML = `<span>${closest.emoji}</span> <strong>${closest.name}</strong> is <span class="days">${label}</span> — don't leave it too late!`;
+      }
+    }
+
+    showSeasonBanner();
+
+    // ── FETCH PRODUCTS ──
+    const params = new URLSearchParams(window.location.search);
+    const who = params.get("who") || "Mom";
+    const occasion = params.get("occasion") || "Christmas";
+    const budget = params.get("budget") || "$25-$75";
+
+    fetch(`/api/products?who=${encodeURIComponent(who)}&occasion=${encodeURIComponent(occasion)}&budget=${encodeURIComponent(budget)}`)
+      .then(r => r.json())
+      .then(products => {
+        clearInterval(msgInterval);
+        const overlay = document.getElementById("loading-overlay");
+        overlay.classList.add("fade-out");
+        setTimeout(() => overlay.style.display = "none", 400);
+
+        const container = document.getElementById("cards-container");
+
+        if (!products || products.length === 0) {
+          container.innerHTML = `
+            <div class="no-results">
+              <h2>No results found</h2>
+              <p>Try a different combination of answers</p>
+              <a href="/quiz">Try Again →</a>
+            </div>`;
+          return;
+        }
+
+        products.forEach((p, i) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.style.animationDelay = `${i * 0.08}s`;
+          card.innerHTML = `
+            <div class="card-img">
+              ${p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">` : "🎁"}
+            </div>
+            <div class="card-body">
+              <div class="card-name">${p.name}</div>
+              ${p.rating ? `<div class="rating">⭐ ${p.rating}${p.reviews ? ` (${p.reviews} reviews)` : ""}</div>` : ""}
+              <div><span class="badge">↑ ${p.badge}</span></div>
+              <div class="card-bottom">
+                <div class="card-price">${p.price}</div>
+                <a href="${p.url}" target="_blank" class="amazon-btn">View on Amazon →</a>
+              </div>
+            </div>`;
+          container.appendChild(card);
+        });
+      })
+      .catch(() => {
+        clearInterval(msgInterval);
+        document.getElementById("loading-overlay").style.display = "none";
+        document.getElementById("cards-container").innerHTML = `
+          <div class="no-results">
+            <h2>Something went wrong</h2>
+            <p>Please try again</p>
+            <a href="/quiz">Try Again →</a>
+          </div>`;
+      });
+  </script>
+
+</body>
+</html>

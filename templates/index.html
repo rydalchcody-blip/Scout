@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scout — Find What Everyone's Getting</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #F8F9FA; color: #0F1B2D; min-height: 100vh; }
+
+    .hero {
+      background: #0F1B2D;
+      padding: 80px 24px 100px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2563EB;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: #F8F9FA;
+      line-height: 1.15;
+      max-width: 640px;
+      margin: 0 auto 16px;
+    }
+    .hero h1 span {
+      color: #2563EB;
+    }
+    .hero p {
+      font-size: 18px;
+      color: #94a3b8;
+      margin-bottom: 40px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: #2563EB;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 16px 40px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .cta-btn:hover { opacity: 0.9; }
+
+    .occasions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 40px 24px;
+      background: #0F1B2D;
+      border-top: 1px solid #1e3a5f;
+    }
+    .occasion-chip {
+      background: #1e3a5f;
+      color: #94a3b8;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .how-it-works {
+      padding: 64px 24px;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .how-it-works h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      color: #0F1B2D;
+    }
+    .steps {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .step {
+      flex: 1;
+      min-width: 180px;
+      max-width: 220px;
+    }
+    .step-num {
+      width: 48px;
+      height: 48px;
+      background: #EFF6FF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2563EB;
+      margin: 0 auto 16px;
+    }
+    .step h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: #64748b; }
+
+    .bottom-cta {
+      background: #0F1B2D;
+      padding: 64px 24px;
+      text-align: center;
+    }
+    .bottom-cta h2 { font-size: 32px; font-weight: 700; color: #F8F9FA; margin-bottom: 16px; }
+    .bottom-cta p { font-size: 16px; color: #94a3b8; margin-bottom: 32px; }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="logo">Scout</div>
+    <h1>Find what everyone's getting for <span>Christmas</span></h1>
+    <p>Answer 3 quick questions. Get the perfect gift in seconds. No more guessing.</p>
+    <a href="/quiz" class="cta-btn">Find a gift →</a>
+  </div>
+
+  <div class="occasions">
+    <div class="occasion-chip">🎄 Christmas</div>
+    <div class="occasion-chip">🎂 Birthdays</div>
+    <div class="occasion-chip">💍 Anniversaries</div>
+    <div class="occasion-chip">🎓 Graduation</div>
+    <div class="occasion-chip">🐣 Easter</div>
+    <div class="occasion-chip">💝 Just Because</div>
+  </div>
+
+  <div class="how-it-works">
+    <h2>How Scout works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Tell us who</h3>
+        <p>Mom, dad, partner, sibling — whoever you're shopping for</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Pick the occasion</h3>
+        <p>Christmas, birthday, anniversary and more</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Get trending picks</h3>
+        <p>See what people are actually buying right now with one click to Amazon</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-cta">
+    <h2>Stop stressing about gifts.</h2>
+    <p>Scout shows you what's trending so you don't have to decide alone.</p>
+    <a href="/quiz" class="cta-btn">Find a gift →</a>
+  </div>
+
+</body>
+</html>
