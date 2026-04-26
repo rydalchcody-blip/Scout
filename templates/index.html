@@ -13,6 +13,7 @@
       background: #0F1B2D;
       padding: 80px 24px 100px;
       text-align: center;
+      transition: background 0.6s ease;
     }
     .logo {
       font-size: 18px;
@@ -30,8 +31,18 @@
       max-width: 640px;
       margin: 0 auto 16px;
     }
-    .hero h1 span {
-      color: #2563EB;
+    .rotating-word {
+      display: inline-block;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      font-weight: 700;
+    }
+    .rotating-word.fade-out {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    .rotating-word.fade-in {
+      opacity: 1;
+      transform: translateY(0);
     }
     .hero p {
       font-size: 18px;
@@ -50,7 +61,7 @@
       padding: 16px 40px;
       border-radius: 12px;
       text-decoration: none;
-      transition: opacity 0.2s;
+      transition: opacity 0.2s, background 0.6s ease;
     }
     .cta-btn:hover { opacity: 0.9; }
 
@@ -62,6 +73,7 @@
       padding: 40px 24px;
       background: #0F1B2D;
       border-top: 1px solid #1e3a5f;
+      transition: background 0.6s ease;
     }
     .occasion-chip {
       background: #1e3a5f;
@@ -69,6 +81,11 @@
       padding: 8px 18px;
       border-radius: 20px;
       font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .occasion-chip.active {
+      color: #fff;
     }
 
     .how-it-works {
@@ -89,11 +106,7 @@
       justify-content: center;
       flex-wrap: wrap;
     }
-    .step {
-      flex: 1;
-      min-width: 180px;
-      max-width: 220px;
-    }
+    .step { flex: 1; min-width: 180px; max-width: 220px; }
     .step-num {
       width: 48px;
       height: 48px;
@@ -106,6 +119,7 @@
       font-weight: 700;
       color: #2563EB;
       margin: 0 auto 16px;
+      transition: background 0.6s ease, color 0.6s ease;
     }
     .step h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
     .step p { font-size: 14px; color: #64748b; }
@@ -114,6 +128,7 @@
       background: #0F1B2D;
       padding: 64px 24px;
       text-align: center;
+      transition: background 0.6s ease;
     }
     .bottom-cta h2 { font-size: 32px; font-weight: 700; color: #F8F9FA; margin-bottom: 16px; }
     .bottom-cta p { font-size: 16px; color: #94a3b8; margin-bottom: 32px; }
@@ -121,48 +136,131 @@
 </head>
 <body>
 
-  <div class="hero">
+  <div class="hero" id="hero">
     <div class="logo">Scout</div>
-    <h1>Find what everyone's getting for <span>Christmas</span></h1>
+    <h1>Find what everyone's getting for <span class="rotating-word fade-in" id="rotating-word">Christmas</span></h1>
     <p>Answer 3 quick questions. Get the perfect gift in seconds. No more guessing.</p>
-    <a href="/quiz" class="cta-btn">Find a gift →</a>
+    <a href="/quiz" class="cta-btn" id="cta-btn">Find a gift →</a>
   </div>
 
-  <div class="occasions">
-    <div class="occasion-chip">🎄 Christmas</div>
-    <div class="occasion-chip">🎂 Birthdays</div>
-    <div class="occasion-chip">💍 Anniversaries</div>
-    <div class="occasion-chip">🎓 Graduation</div>
-    <div class="occasion-chip">🐣 Easter</div>
-    <div class="occasion-chip">💝 Just Because</div>
+  <div class="occasions" id="occasions-bar">
+    <div class="occasion-chip active" id="chip-0">🎄 Christmas</div>
+    <div class="occasion-chip" id="chip-1">🎂 Birthdays</div>
+    <div class="occasion-chip" id="chip-2">💐 Mother's Day</div>
+    <div class="occasion-chip" id="chip-3">👔 Father's Day</div>
+    <div class="occasion-chip" id="chip-4">💍 Anniversaries</div>
+    <div class="occasion-chip" id="chip-5">🎓 Graduation</div>
+    <div class="occasion-chip" id="chip-6">🐣 Easter</div>
+    <div class="occasion-chip" id="chip-7">❤️ Valentine's Day</div>
+    <div class="occasion-chip" id="chip-8">🏠 Housewarming</div>
+    <div class="occasion-chip" id="chip-9">💝 Just Because</div>
   </div>
 
   <div class="how-it-works">
     <h2>How Scout works</h2>
     <div class="steps">
       <div class="step">
-        <div class="step-num">1</div>
+        <div class="step-num" id="step-num-1">1</div>
         <h3>Tell us who</h3>
         <p>Mom, dad, partner, sibling — whoever you're shopping for</p>
       </div>
       <div class="step">
-        <div class="step-num">2</div>
+        <div class="step-num" id="step-num-2">2</div>
         <h3>Pick the occasion</h3>
         <p>Christmas, birthday, anniversary and more</p>
       </div>
       <div class="step">
-        <div class="step-num">3</div>
+        <div class="step-num" id="step-num-3">3</div>
         <h3>Get trending picks</h3>
         <p>See what people are actually buying right now with one click to Amazon</p>
       </div>
     </div>
   </div>
 
-  <div class="bottom-cta">
+  <div class="bottom-cta" id="bottom-cta">
     <h2>Stop stressing about gifts.</h2>
     <p>Scout shows you what's trending so you don't have to decide alone.</p>
-    <a href="/quiz" class="cta-btn">Find a gift →</a>
+    <a href="/quiz" class="cta-btn" id="cta-btn-2">Find a gift →</a>
   </div>
+
+  <script>
+    const occasions = [
+      { label: "Christmas",     emoji: "🎄", color: "#16A34A", bg: "#052e16" },
+      { label: "Birthdays",     emoji: "🎂", color: "#F59E0B", bg: "#1c1100" },
+      { label: "Mother's Day",  emoji: "💐", color: "#EC4899", bg: "#1f0011" },
+      { label: "Father's Day",  emoji: "👔", color: "#3B82F6", bg: "#0c1a3a" },
+      { label: "Anniversaries", emoji: "💍", color: "#A855F7", bg: "#1a0a2e" },
+      { label: "Graduation",    emoji: "🎓", color: "#06B6D4", bg: "#001a1f" },
+      { label: "Easter",        emoji: "🐣", color: "#F472B6", bg: "#1f0016" },
+      { label: "Valentine's Day",emoji: "❤️", color: "#EF4444", bg: "#1f0000" },
+      { label: "Housewarming",  emoji: "🏠", color: "#F97316", bg: "#1f0800" },
+      { label: "Just Because",  emoji: "💝", color: "#2563EB", bg: "#0F1B2D" },
+    ];
+
+    let current = 0;
+    const wordEl = document.getElementById("rotating-word");
+    const hero = document.getElementById("hero");
+    const occasionsBar = document.getElementById("occasions-bar");
+    const bottomCta = document.getElementById("bottom-cta");
+    const ctaBtn = document.getElementById("cta-btn");
+    const ctaBtn2 = document.getElementById("cta-btn-2");
+    const stepNums = [
+      document.getElementById("step-num-1"),
+      document.getElementById("step-num-2"),
+      document.getElementById("step-num-3"),
+    ];
+
+    function applyTheme(index) {
+      const o = occasions[index];
+
+      // Update rotating word
+      wordEl.classList.remove("fade-in");
+      wordEl.classList.add("fade-out");
+
+      setTimeout(() => {
+        wordEl.textContent = o.label;
+        wordEl.style.color = o.color;
+        wordEl.classList.remove("fade-out");
+        wordEl.classList.add("fade-in");
+      }, 400);
+
+      // Update backgrounds
+      hero.style.background = o.bg;
+      occasionsBar.style.background = o.bg;
+      bottomCta.style.background = o.bg;
+
+      // Update CTA buttons
+      ctaBtn.style.background = o.color;
+      ctaBtn2.style.background = o.color;
+
+      // Update step numbers
+      stepNums.forEach(s => {
+        s.style.background = o.color + "22";
+        s.style.color = o.color;
+      });
+
+      // Update chips
+      document.querySelectorAll(".occasion-chip").forEach((chip, i) => {
+        chip.classList.remove("active");
+        chip.style.borderColor = "";
+        chip.style.color = "";
+        chip.style.background = "";
+        if (i === index) {
+          chip.classList.add("active");
+          chip.style.background = o.color + "33";
+          chip.style.color = o.color;
+          chip.style.borderColor = o.color;
+        }
+      });
+    }
+
+    // Auto rotate every 2.5 seconds
+    applyTheme(0);
+    setInterval(() => {
+      current = (current + 1) % occasions.length;
+      applyTheme(current);
+    }, 2500);
+  </script>
 
 </body>
 </html>
