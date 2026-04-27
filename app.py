@@ -153,6 +153,15 @@ def search_amazon(keyword, min_price, max_price, fallback_keyword=None):
                 title = item.get("productDescription", "").strip()
                 if not title:
                     continue
+                # Filter out inappropriate products
+                blacklist = [
+                    "sexy", "adult", "erotic", "lingerie", "thong", "bra", "panty",
+                    "vibrat", "dildo", "penis", "vagina", "breast", "nipple", "nude",
+                    "naked", "porn", "xxx", "fetish", "bondage", "massage oil",
+                    "edible", "stripper", "bachelor", "bachelorette"
+                ]
+                if any(word.lower() in title.lower() for word in blacklist):
+                    continue
                 affiliate_url = f"https://www.amazon.com/dp/{asin}?tag={AFFILIATE_TAG}"
                 reviews = item.get("countReview", "")
                 products.append({
