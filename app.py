@@ -4,8 +4,7 @@ import random
 
 app = Flask(__name__)
 
-RAPIDAPI_KEY = "6381a44f2cmshc129034cc7463adp1570a1jsn7ef9c5f2a81f"
-RAPIDAPI_HOST = "axesso-axesso-amazon-data-service-v1.p.rapidapi.com"
+RAINFOREST_API_KEY = "6926EF1C425F40AE9DC3A23FE10D3B63"
 AFFILIATE_TAG = "crydalch7-20"
 
 KEYWORD_MAP = {
@@ -16,7 +15,7 @@ KEYWORD_MAP = {
     ("Mom", "Easter"): "easter gifts for mom",
     ("Mom", "Just Because"): "thoughtful gifts for mom",
     ("Mom", "Valentine's Day"): "valentines gifts for mom",
-    ("Mom", "Mother's Day"): "mothers day gifts",
+    ("Mom", "Mother's Day"): "mothers day gifts for mom",
     ("Mom", "New Baby"): "new mom gifts",
 
     ("Dad", "Christmas"): "gifts for dad christmas",
@@ -26,7 +25,7 @@ KEYWORD_MAP = {
     ("Dad", "Easter"): "easter gifts for dad",
     ("Dad", "Just Because"): "cool gifts for dad",
     ("Dad", "Valentine's Day"): "valentines gifts for husband",
-    ("Dad", "Father's Day"): "fathers day gifts",
+    ("Dad", "Father's Day"): "fathers day gifts for dad",
     ("Dad", "New Baby"): "new dad gifts",
 
     ("Partner", "Christmas"): "romantic christmas gifts",
@@ -86,7 +85,7 @@ KEYWORD_MAP = {
     ("Teacher", "Just Because"): "appreciation gifts for teacher",
     ("Teacher", "Easter"): "easter gifts for teacher",
 
-    ("Kid", "Christmas"): "best christmas toys for kids 2024",
+    ("Kid", "Christmas"): "best christmas toys for kids",
     ("Kid", "Birthday"): "popular birthday gifts for kids",
     ("Kid", "Easter"): "easter basket stuffers for kids",
     ("Kid", "Graduation"): "kindergarten graduation gifts",
@@ -119,73 +118,110 @@ BADGES = [
     "Scout's top pick",
 ]
 
-def search_amazon(keyword, min_price, max_price, fallback_keyword=None):
-    def fetch(kw):
-        url = "https://axesso-axesso-amazon-data-service-v1.p.rapidapi.com/amz/amazon-search-by-keyword-asin"
+BLACKLIST = [
+    "sexy", "adult", "erotic", "lingerie", "thong", "bra", "panty",
+    "vibrat", "dildo", "penis", "vagina", "breast", "nipple", "nude",
+    "naked", "porn", "xxx", "fetish", "bondage", "massage oil",
+    "edible", "stripper", "bachelor", "bachelorette"
+]
+
+def search_rainforest(keyword, min_price, max_price, fallback_keyword=None):
+    def fetch(kw, min_p, max_p):
         params = {
-            "keyword": kw,
-            "domainCode": "com",
-            "sortBy": "featured",
-            "withCache": "true",
-            "page": "1",
-            "countryCode": "US",
+            "api_key": RAINFOREST_API_KEY,
+            "type": "search",
+            "amazon_domain": "amazon.com",
+            "search_term": kw,
+            "sort_by": "featured",
+            "exclude_sponsored": "true",
         }
-        headers = {
-            "x-rapidapi-host": RAPIDAPI_HOST,
-            "x-rapidapi-key": RAPIDAPI_KEY,
-        }
+        if min_p > 0:
+            params["min_price"] = str(int(min_p))
+        if max_p != 9999:
+            params["max_price"] = str(int(max_p))
+
         try:
-            response = requests.get(url, headers=headers, params=params, timeout=10)
+            response = requests.get(
+                "https://api.rainforestapi.com/request",
+                params=params,
+                timeout=15
+            )
             data = response.json()
             products = []
-            items = data.get("searchProductDetails", [])
+            items = data.get("search_results", [])
+
             for item in items:
-                price = item.get("price", 0)
+                # Get title
+                title = item.get("title", "").strip()
+                if not title:
+                    continue
+
+                # Filter inappropriate content
+                if any(word.lower() in title.lower() for word in BLACKLIST):
+                    continue
+
+                # Get price
+                price_data = item.get("price", {})
+                price = price_data.get("value", 0) if price_data else 0
+                if not price:
+                    # Try buybox price
+                    buybox = item.get("buybox_winner", {})
+                    if buybox:
+                        price_data = buybox.get("price", {})
+                        price = price_data.get("value", 0) if price_data else 0
                 if not price:
                     continue
-                if price < min_price:
+
+                # Enforce budget
+                if price < min_p:
                     continue
-                if max_price != 9999 and price > max_price:
+                if max_p != 9999 and price > max_p:
                     continue
+
+                # Get ASIN and build affiliate URL
                 asin = item.get("asin", "")
                 if not asin:
                     continue
-                title = item.get("productDescription", "").strip()
-                if not title:
-                    continue
-                # Filter out inappropriate products
-                blacklist = [
-                    "sexy", "adult", "erotic", "lingerie", "thong", "bra", "panty",
-                    "vibrat", "dildo", "penis", "vagina", "breast", "nipple", "nude",
-                    "naked", "porn", "xxx", "fetish", "bondage", "massage oil",
-                    "edible", "stripper", "bachelor", "bachelorette"
-                ]
-                if any(word.lower() in title.lower() for word in blacklist):
-                    continue
                 affiliate_url = f"https://www.amazon.com/dp/{asin}?tag={AFFILIATE_TAG}"
-                reviews = item.get("countReview", "")
+
+                # Get image
+                image = item.get("image", "")
+
+                # Get rating
+                rating = item.get("rating", "")
+                reviews = item.get("ratings_total", "")
+
                 products.append({
                     "name": title[:65] + ("..." if len(title) > 65 else ""),
                     "price": f"${price:.2f}",
-                    "image": item.get("imgUrl", ""),
+                    "image": image,
                     "url": affiliate_url,
-                    "rating": item.get("productRating", ""),
+                    "rating": f"{rating} out of 5 stars" if rating else "",
                     "reviews": f"{int(reviews):,}" if reviews else "",
                     "badge": random.choice(BADGES),
                 })
+
                 if len(products) >= 8:
                     break
+
             return products
+
         except Exception as e:
-            print(f"API error: {e}")
+            print(f"Rainforest API error: {e}")
             return []
 
-    results = fetch(keyword)
+    # Try specific keyword first
+    results = fetch(keyword, min_price, max_price)
+
+    # If less than 4 results try fallback
     if len(results) < 4 and fallback_keyword:
-        results = fetch(fallback_keyword)
+        results = fetch(fallback_keyword, min_price, max_price)
+
+    # If still less than 4 try broad search
     if len(results) < 4:
-        budget_label = f"under ${int(max_price)}" if max_price != 9999 else "over $125"
-        results = fetch(f"best gifts {budget_label}")
+        budget_label = f"under {int(max_price)}" if max_price != 9999 else "over 125"
+        results = fetch(f"best gifts {budget_label} dollars", min_price, max_price)
+
     return results
 
 @app.route("/")
@@ -213,7 +249,7 @@ def api_products():
     min_price, max_price = BUDGET_MAP.get(budget, (25, 75))
     keyword = KEYWORD_MAP.get((who, occasion), f"gifts for {who.lower()} {occasion.lower()}")
     fallback = f"gifts for {who.lower()}"
-    products = search_amazon(keyword, min_price, max_price, fallback_keyword=fallback)
+    products = search_rainforest(keyword, min_price, max_price, fallback_keyword=fallback)
     return jsonify(products)
 
 if __name__ == "__main__":
